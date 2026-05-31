@@ -1,0 +1,28 @@
+import { CategoryBrowseCard } from "@/components/cards/category-browse-card";
+import { MobileShell } from "@/components/layout/mobile-shell";
+import { getAllCategories } from "@/data/categories";
+import { layout } from "@/lib/layout";
+
+export default function CategoriesPage() {
+  const categories = getAllCategories();
+
+  return (
+    <MobileShell>
+      <div className={`flex flex-col ${layout.pageX} py-3`}>
+        <header className="mb-3">
+          <h1 className="text-[22px] font-semibold leading-7 text-[#111827]">
+            All Categories
+          </h1>
+          <p className="mt-1 text-sm leading-5 text-[#6B7280]">
+            Browse trusted local workers by service
+          </p>
+        </header>
+        <main className="flex flex-col gap-2.5 pb-2">
+          {categories.map((category) => (
+            <CategoryBrowseCard key={category.slug} category={category} />
+          ))}
+        </main>
+      </div>
+    </MobileShell>
+  );
+}

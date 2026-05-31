@@ -1,0 +1,54 @@
+import { notFound } from "next/navigation";
+
+import { AboutSection } from "@/components/profile/about-section";
+import { ContactSection } from "@/components/profile/contact-section";
+import { GallerySection } from "@/components/profile/gallery-section";
+import { ProfileHeroCard } from "@/components/profile/profile-hero-card";
+import { ProfilePageHeader } from "@/components/profile/profile-page-header";
+import { ReviewsSection } from "@/components/profile/reviews-section";
+import { ServicesSection } from "@/components/profile/services-section";
+import { MobileShell } from "@/components/layout/mobile-shell";
+import { getAllWorkerIds, getWorkerProfile } from "@/data";
+import { layout } from "@/lib/layout";
+
+type WorkerProfilePageProps = {
+  params: Promise<{ id: string }>;
+};
+
+export function generateStaticParams() {
+  return getAllWorkerIds().map((id) => ({ id }));
+}
+
+export default async function WorkerProfilePage({
+  params,
+}: WorkerProfilePageProps) {
+  const { id } = await params;
+  const profile = getWorkerProfile(id);
+
+  if (!profile) {
+    notFound();
+  }
+
+  const { worker, details, reviews } = profile;
+
+  return (
+    <MobileShell>
+      <div className={`flex flex-col ${layout.pageX}`}>
+        <ProfilePageHeader categorySlug={worker.categorySlug} />
+        <main
+          className={`flex flex-col ${layout.sectionGap} py-3 pb-4`}
+        >
+          <ProfileHeroCard worker={worker} />
+          <ContactSection worker={worker} details={details} />
+          <AboutSection about={details.about} />
+          <ServicesSection services={details.services} />
+          <GallerySection
+            images={details.gallery}
+            moreCount={details.galleryMoreCount}
+          />
+          <ReviewsSection worker={worker} reviews={reviews} />
+        </main>
+      </div>
+    </MobileShell>
+  );
+}

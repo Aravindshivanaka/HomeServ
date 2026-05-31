@@ -1,0 +1,55 @@
+import { defineWorkers, maskPhone } from "@/data/workers/_shared";
+
+export const painterWorkers = defineWorkers(
+  "painter",
+  "PAINTER",
+  "Painter",
+  [
+    {
+      id: "painter-colour-pro",
+      name: "Colour Pro Paints",
+      area: "Jagtial",
+      rating: 4.5,
+      reviewCount: 62,
+      yearsExperience: 10,
+      isVerified: true,
+      imageUrl: "/workers/painter-1.svg",
+      isUnlocked: true,
+    },
+    {
+      id: "painter-sri-wall",
+      name: "Sri Wall Finishing",
+      area: "Korutla",
+      rating: 4.4,
+      reviewCount: 48,
+      yearsExperience: 8,
+      isVerified: true,
+      imageUrl: "/workers/painter-2.svg",
+      isUnlocked: true,
+    },
+    {
+      id: "painter-prime-coat",
+      name: "Prime Coat Services",
+      area: "Metpally",
+      rating: 4.3,
+      reviewCount: 35,
+      yearsExperience: 6,
+      isVerified: true,
+      imageUrl: "/workers/painter-3.svg",
+      isUnlocked: false,
+      phoneMasked: maskPhone("98120"),
+    },
+    {
+      id: "painter-venkat",
+      name: "Venkat Paint Works",
+      area: "Jagtial",
+      rating: 4.2,
+      reviewCount: 27,
+      yearsExperience: 5,
+      isVerified: false,
+      imageUrl: "/workers/painter-4.svg",
+      isUnlocked: false,
+      phoneMasked: maskPhone("97210"),
+    },
+  ]
+);

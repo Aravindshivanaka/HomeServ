@@ -1,0 +1,55 @@
+import { defineWorkers, maskPhone } from "@/data/workers/_shared";
+
+export const masonWorkers = defineWorkers(
+  "mason",
+  "MASON",
+  "Mason",
+  [
+    {
+      id: "mason-build-right",
+      name: "Build Right Masonry",
+      area: "Jagtial",
+      rating: 4.5,
+      reviewCount: 51,
+      yearsExperience: 15,
+      isVerified: true,
+      imageUrl: "/workers/mason-1.svg",
+      isUnlocked: true,
+    },
+    {
+      id: "mason-sri-cement",
+      name: "Sri Cement Works",
+      area: "Korutla",
+      rating: 4.4,
+      reviewCount: 39,
+      yearsExperience: 11,
+      isVerified: true,
+      imageUrl: "/workers/mason-2.svg",
+      isUnlocked: true,
+    },
+    {
+      id: "mason-wall-plaster",
+      name: "Wall & Plaster Mason",
+      area: "Metpally",
+      rating: 4.3,
+      reviewCount: 31,
+      yearsExperience: 8,
+      isVerified: true,
+      imageUrl: "/workers/mason-3.svg",
+      isUnlocked: false,
+      phoneMasked: maskPhone("98430"),
+    },
+    {
+      id: "mason-foundation",
+      name: "Foundation Mason Services",
+      area: "Jagtial",
+      rating: 4.2,
+      reviewCount: 22,
+      yearsExperience: 6,
+      isVerified: false,
+      imageUrl: "/workers/mason-4.svg",
+      isUnlocked: false,
+      phoneMasked: maskPhone("97120"),
+    },
+  ]
+);

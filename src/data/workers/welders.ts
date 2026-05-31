@@ -1,0 +1,55 @@
+import { defineWorkers, maskPhone } from "@/data/workers/_shared";
+
+export const welderWorkers = defineWorkers(
+  "welder",
+  "WELDER",
+  "Welder",
+  [
+    {
+      id: "welder-steel-fix",
+      name: "Steel Fix Welding",
+      area: "Jagtial",
+      rating: 4.4,
+      reviewCount: 44,
+      yearsExperience: 12,
+      isVerified: true,
+      imageUrl: "/workers/welder-1.svg",
+      isUnlocked: true,
+    },
+    {
+      id: "welder-hanuman",
+      name: "Hanuman Iron Works",
+      area: "Korutla",
+      rating: 4.3,
+      reviewCount: 36,
+      yearsExperience: 9,
+      isVerified: true,
+      imageUrl: "/workers/welder-2.svg",
+      isUnlocked: true,
+    },
+    {
+      id: "welder-gate-grill",
+      name: "Gate & Grill Welding",
+      area: "Metpally",
+      rating: 4.2,
+      reviewCount: 28,
+      yearsExperience: 7,
+      isVerified: true,
+      imageUrl: "/workers/welder-3.svg",
+      isUnlocked: false,
+      phoneMasked: maskPhone("96540"),
+    },
+    {
+      id: "welder-local-iron",
+      name: "Local Iron Fabrication",
+      area: "Dharmapuri",
+      rating: 4.1,
+      reviewCount: 19,
+      yearsExperience: 5,
+      isVerified: false,
+      imageUrl: "/workers/welder-4.svg",
+      isUnlocked: false,
+      phoneMasked: maskPhone("95880"),
+    },
+  ]
+);
