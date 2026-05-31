@@ -8,6 +8,8 @@ import { fetchCategories } from "@/lib/categories";
 import { fetchPopularWorkers } from "@/lib/workers";
 import { layout } from "@/lib/layout";
 
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
   const categories = await fetchCategories();
   const popularWorkers = await fetchPopularWorkers();

@@ -9,6 +9,8 @@ export const metadata: Metadata = {
   description: "Browse verified local service categories near you. Find plumbers, electricians, carpenters, AC repair, painters, masons, and rental services in Jagtial.",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function CategoriesPage() {
   const categories = await fetchCategories();
 

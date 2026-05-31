@@ -32,6 +32,8 @@ export function generateStaticParams() {
   return getAllWorkerIds().map((id) => ({ id }));
 }
 
+export const dynamic = "force-dynamic";
+
 export default async function WorkerProfilePage({
   params,
 }: WorkerProfilePageProps) {

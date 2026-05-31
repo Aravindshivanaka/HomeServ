@@ -27,6 +27,8 @@ export function generateStaticParams() {
   return getCategorySlugs().map((slug) => ({ slug }));
 }
 
+export const dynamic = "force-dynamic";
+
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const { slug } = await params;
   const category = await fetchCategoryBySlug(slug);
