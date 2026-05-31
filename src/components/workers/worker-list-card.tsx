@@ -72,21 +72,27 @@ export function WorkerListCard({ worker }: WorkerListCardProps) {
             {worker.name}
           </h2>
           <p className="mt-1 flex items-center gap-1 text-sm leading-5 text-[#6B7280]">
-            <Star
-              className={cn(
-                "size-3.5 shrink-0",
-                locked
-                  ? "fill-[#D1D5DB] text-[#D1D5DB]"
-                  : "fill-[#FACC15] text-[#FACC15]"
-              )}
-              aria-hidden
-            />
-            <span>
-              {worker.rating}{" "}
-              <span className="text-[#6B7280]">
-                ({worker.reviewCount} reviews)
-              </span>
-            </span>
+            {!worker.rating || worker.rating === 0 ? (
+              <span className="text-xs text-[#6B7280] italic">No reviews yet</span>
+            ) : (
+              <>
+                <Star
+                  className={cn(
+                    "size-3.5 shrink-0",
+                    locked
+                      ? "fill-[#D1D5DB] text-[#D1D5DB]"
+                      : "fill-[#FACC15] text-[#FACC15]"
+                  )}
+                  aria-hidden
+                />
+                <span>
+                  {worker.rating.toFixed(1)}{" "}
+                  <span className="text-[#6B7280]">
+                    ({worker.reviewCount} reviews)
+                  </span>
+                </span>
+              </>
+            )}
           </p>
           <p className="mt-0.5 flex items-center gap-1 text-sm leading-5 text-[#6B7280]">
             <MapPin className="size-3.5 shrink-0 text-[#9CA3AF]" aria-hidden />
@@ -126,8 +132,8 @@ export function WorkerListCard({ worker }: WorkerListCardProps) {
             href={`/worker/${worker.id}`}
             className={`inline-flex min-h-[48px] ${layout.touchBtn} items-center justify-center gap-1.5 rounded-xl bg-[#2563EB] text-sm font-semibold text-white active:bg-[#1D4ED8]`}
           >
-            <Eye className="size-4 shrink-0" aria-hidden />
-            View Profile
+            <Lock className="size-4 shrink-0" aria-hidden />
+            Unlock Mobile Number
           </Link>
         ) : (
           <a

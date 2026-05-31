@@ -1,6 +1,7 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback } from "react";
+import { createContext, useContext, useState, useCallback, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
 
 export type User = {
   mobile: string;
@@ -20,20 +21,43 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  // Session-only mock state (no persistence)
   const [user, setUser] = useState<User | null>(null);
-  
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [onLoginSuccessCallback, setOnLoginSuccessCallback] = useState<(() => void) | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setUser({
+          mobile: session.user.phone ? session.user.phone.replace("+91", "") : (session.user.email || ""),
+          name: "Trusted User",
+        });
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setUser({
+          mobile: session.user.phone ? session.user.phone.replace("+91", "") : (session.user.email || ""),
+          name: "Trusted User",
+        });
+      } else {
+        setUser(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const login = useCallback((mobile: string) => {
     setUser({
       mobile,
-      name: "Trusted User", // Mock name for frontend MVP
+      name: "Trusted User",
     });
   }, []);
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    await supabase.auth.signOut();
     setUser(null);
   }, []);
 

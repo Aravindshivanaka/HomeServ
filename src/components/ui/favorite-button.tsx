@@ -1,6 +1,7 @@
 "use client";
 
 import { Heart } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import { cn } from "@/lib/utils";
 import { useWishlist } from "@/lib/wishlist-context";
@@ -13,7 +14,8 @@ type FavoriteButtonProps = {
 
 export function FavoriteButton({ workerId, className }: FavoriteButtonProps) {
   const { toggleWishlist, isFavorited } = useWishlist();
-  const { user, openLoginModal } = useAuth();
+  const { user } = useAuth();
+  const router = useRouter();
   const isFavorite = isFavorited(workerId);
 
   return (
@@ -24,9 +26,8 @@ export function FavoriteButton({ workerId, className }: FavoriteButtonProps) {
         e.stopPropagation();
         
         if (!user) {
-          openLoginModal(() => {
-            toggleWishlist(workerId);
-          });
+          localStorage.setItem("pending-wishlist-save", workerId);
+          router.push("/login");
           return;
         }
         

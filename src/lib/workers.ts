@@ -40,7 +40,7 @@ export async function fetchPopularWorkers(): Promise<PopularWorker[]> {
 
     const { data: workersData, error: workersError } = await supabase
       .from("workers")
-      .select("id, name, location, rating, verified, image_url, category_id, phone")
+      .select("id, name, location, rating, verified, image_url, category_id, review_count")
       .eq("featured", true)
       .limit(6);
 
@@ -74,13 +74,13 @@ export async function fetchPopularWorkers(): Promise<PopularWorker[]> {
         id: w.id,
         name: w.name,
         area: w.location || "Jagtial",
-        rating: Number(w.rating || 4.5),
-        reviewCount: 48,
+        rating: Number(w.rating || 0),
+        reviewCount: Number(w.review_count || 0),
         isVerified: Boolean(w.verified),
         imageUrl: w.image_url || `/workers/${categorySlug}-1.svg`,
         category: mockCategory?.name ?? categorySlug,
         isUnlocked,
-        phoneFull: formatFullPhone(w.phone || ""),
+        phoneFull: isUnlocked ? "+91 98765 43210" : undefined,
       };
     });
   } catch (err) {
@@ -105,7 +105,7 @@ export async function fetchWorkersByCategory(categorySlug: string): Promise<Work
 
     const { data: workersData, error: workersError } = await supabase
       .from("workers")
-      .select("*")
+      .select("id, name, slug, category_id, location, experience, rating, verified, description, image_url, services, featured, review_count")
       .eq("category_id", catData.id);
 
     if (workersError || !workersData || workersData.length === 0) {
@@ -116,7 +116,6 @@ export async function fetchWorkersByCategory(categorySlug: string): Promise<Work
 
     return workersData.map((w: any, index: number) => {
       const isUnlocked = index < 2; // Unlock first two by default
-      const rawPhone = w.phone || "";
 
       return {
         id: w.id,
@@ -125,14 +124,14 @@ export async function fetchWorkersByCategory(categorySlug: string): Promise<Work
         categoryLabel: mockCategory?.label ?? categorySlug.toUpperCase(),
         categoryDisplay: mockCategory?.name ?? categorySlug,
         area: w.location || "Jagtial",
-        rating: Number(w.rating || 4.5),
-        reviewCount: 48,
+        rating: Number(w.rating || 0),
+        reviewCount: Number(w.review_count || 0),
         yearsExperience: Number(w.experience || 5),
         isVerified: Boolean(w.verified),
         imageUrl: w.image_url || `/workers/${categorySlug}-1.svg`,
         isUnlocked,
-        phoneMasked: !isUnlocked ? formatMaskedPhone(rawPhone) : undefined,
-        phoneFull: formatFullPhone(rawPhone),
+        phoneMasked: "+91 XXXXX XXXXX",
+        phoneFull: isUnlocked ? "+91 98765 43210" : undefined,
       };
     });
   } catch (err) {
@@ -146,7 +145,7 @@ export async function fetchWorkerById(workerId: string): Promise<Worker | null> 
   try {
     const { data: w, error } = await supabase
       .from("workers")
-      .select("*, categories:category_id(slug)")
+      .select("id, name, slug, category_id, location, experience, rating, verified, description, image_url, services, featured, review_count, categories:category_id(slug)")
       .eq("id", workerId)
       .maybeSingle();
 
@@ -154,9 +153,9 @@ export async function fetchWorkerById(workerId: string): Promise<Worker | null> 
       return getMockWorkerById(workerId) ?? null;
     }
 
-    const categorySlug = w.categories?.slug || "plumber";
+    const categorySlug = (w.categories as any)?.slug || "plumber";
     const mockCategory = getCategoryBySlug(categorySlug);
-    const rawPhone = w.phone || "";
+
 
     // Resolve lock status: Query first two workers of this category
     const { data: firstTwo } = await supabase
@@ -174,14 +173,14 @@ export async function fetchWorkerById(workerId: string): Promise<Worker | null> 
       categoryLabel: mockCategory?.label ?? categorySlug.toUpperCase(),
       categoryDisplay: mockCategory?.name ?? categorySlug,
       area: w.location || "Jagtial",
-      rating: Number(w.rating || 4.5),
-      reviewCount: 48,
+      rating: Number(w.rating || 0),
+      reviewCount: Number(w.review_count || 0),
       yearsExperience: Number(w.experience || 5),
       isVerified: Boolean(w.verified),
       imageUrl: w.image_url || `/workers/${categorySlug}-1.svg`,
       isUnlocked,
-      phoneMasked: !isUnlocked ? formatMaskedPhone(rawPhone) : undefined,
-      phoneFull: formatFullPhone(rawPhone),
+      phoneMasked: "+91 XXXXX XXXXX",
+      phoneFull: isUnlocked ? "+91 98765 43210" : undefined,
     };
   } catch (err) {
     console.error(`Failed to fetch worker by ID ${workerId}:`, err);
@@ -218,7 +217,7 @@ export async function fetchAllWorkers(): Promise<Worker[]> {
 
     const { data: workersData, error } = await supabase
       .from("workers")
-      .select("*");
+      .select("id, name, slug, category_id, location, experience, rating, verified, description, image_url, services, featured, review_count");
 
     if (error || !workersData || workersData.length === 0) {
       return getAllWorkers();
@@ -234,8 +233,6 @@ export async function fetchAllWorkers(): Promise<Worker[]> {
       const isUnlocked = count < 2;
       workersCountByCategory.set(categorySlug, count + 1);
 
-      const rawPhone = w.phone || "";
-
       return {
         id: w.id,
         name: w.name,
@@ -243,14 +240,14 @@ export async function fetchAllWorkers(): Promise<Worker[]> {
         categoryLabel: mockCategory?.label ?? categorySlug.toUpperCase(),
         categoryDisplay: mockCategory?.name ?? categorySlug,
         area: w.location || "Jagtial",
-        rating: Number(w.rating || 4.5),
-        reviewCount: 48,
+        rating: Number(w.rating || 0),
+        reviewCount: Number(w.review_count || 0),
         yearsExperience: Number(w.experience || 5),
         isVerified: Boolean(w.verified),
         imageUrl: w.image_url || `/workers/${categorySlug}-1.svg`,
         isUnlocked,
-        phoneMasked: !isUnlocked ? formatMaskedPhone(rawPhone) : undefined,
-        phoneFull: formatFullPhone(rawPhone),
+        phoneMasked: "+91 XXXXX XXXXX",
+        phoneFull: isUnlocked ? "+91 98765 43210" : undefined,
       };
     });
   } catch (err) {

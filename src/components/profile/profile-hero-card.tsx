@@ -58,16 +58,22 @@ export function ProfileHeroCard({ worker }: ProfileHeroCardProps) {
             <span>{worker.area}, Jagtial District</span>
           </p>
           <p className="mt-1 flex items-center gap-1 text-sm text-[#6B7280]">
-            <Star
-              className="size-3.5 shrink-0 fill-[#FACC15] text-[#FACC15]"
-              aria-hidden
-            />
-            <span>
-              {worker.rating}{" "}
-              <span className="text-[#6B7280]">
-                ({worker.reviewCount} Reviews)
-              </span>
-            </span>
+            {!worker.rating || worker.rating === 0 ? (
+              <span className="text-xs text-[#6B7280] italic">No reviews yet</span>
+            ) : (
+              <>
+                <Star
+                  className="size-3.5 shrink-0 fill-[#FACC15] text-[#FACC15]"
+                  aria-hidden
+                />
+                <span>
+                  {worker.rating.toFixed(1)}{" "}
+                  <span className="text-[#6B7280]">
+                    ({worker.reviewCount} Reviews)
+                  </span>
+                </span>
+              </>
+            )}
           </p>
           <p className="mt-0.5 flex items-center gap-1 text-xs text-[#6B7280]">
             <Briefcase className="size-3 shrink-0 text-[#9CA3AF]" aria-hidden />
