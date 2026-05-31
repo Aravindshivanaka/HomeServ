@@ -25,6 +25,9 @@ export const categoryIconMap: Record<CategoryIcon, LucideIcon> = {
   "brick-wall": BrickWall,
 };
 
-export function getCategoryIcon(icon: CategoryIcon): LucideIcon {
-  return categoryIconMap[icon];
+export function getCategoryIcon(icon: any): LucideIcon {
+  if (icon && icon in categoryIconMap) {
+    return categoryIconMap[icon as CategoryIcon];
+  }
+  return Wrench;
 }

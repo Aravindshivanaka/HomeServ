@@ -51,7 +51,9 @@ export function buildProfileDetails(worker: Worker): WorkerProfileDetails {
     services: servicesByCategory[worker.categorySlug].slice(0, 4),
     gallery: galleryForCategory(worker.categorySlug),
     galleryMoreCount: 4,
-    phoneFull: worker.isUnlocked ? fullPhoneFromWorker(worker) : undefined,
+    phoneFull: worker.isUnlocked
+      ? (worker.phoneFull ?? fullPhoneFromWorker(worker))
+      : undefined,
   };
 
   detailsCache.set(cacheKey, details);

@@ -17,6 +17,8 @@ export type Worker = {
   isUnlocked: boolean;
   /** Partially masked number — locked workers only */
   phoneMasked?: string;
+  /** Full formatted phone number — unlocked workers only */
+  phoneFull?: string;
 };
 
 /** Subset used on the home “Popular Near You” carousel */
@@ -31,4 +33,6 @@ export type PopularWorker = Pick<
   | "imageUrl"
 > & {
   category: string;
+  isUnlocked?: boolean;
+  phoneFull?: string;
 };

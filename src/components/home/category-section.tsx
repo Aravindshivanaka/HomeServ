@@ -10,11 +10,20 @@ import {
 } from "@/data/categories";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import type { Category } from "@/types";
 
-export function CategorySection() {
+type CategorySectionProps = {
+  primaryCategories?: Category[];
+  expandedCategories?: Category[];
+};
+
+export function CategorySection({
+  primaryCategories,
+  expandedCategories,
+}: CategorySectionProps) {
   const [expanded, setExpanded] = useState(false);
-  const primary = getHomePrimaryCategories();
-  const extra = getHomeExpandedCategories();
+  const primary = primaryCategories ?? getHomePrimaryCategories();
+  const extra = expandedCategories ?? getHomeExpandedCategories();
 
   return (
     <section aria-labelledby="categories-heading">

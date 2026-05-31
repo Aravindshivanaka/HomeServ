@@ -7,11 +7,15 @@ import Link from "next/link";
 import { layout } from "@/lib/layout";
 import { getCategoryIcon } from "@/lib/category-icons";
 import { performLocalSearch, type SearchResults } from "@/lib/search";
+import { fetchAllWorkers } from "@/lib/workers";
+import type { Category, Worker } from "@/types";
 
-export function SearchBar() {
+export function SearchBar({ initialCategories }: { initialCategories?: Category[] }) {
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [results, setResults] = useState<SearchResults>({ categories: [], workers: [] });
+  const [allWorkers, setAllWorkers] = useState<Worker[]>([]);
+  const [hasFetchedWorkers, setHasFetchedWorkers] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown on click outside or touch outside
@@ -36,14 +40,33 @@ export function SearchBar() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setQuery(value);
-    const searchResults = performLocalSearch(value);
+    
+    // Fallback to local static search list until Supabase workers are loaded
+    const searchResults = performLocalSearch(
+      value,
+      initialCategories,
+      allWorkers.length > 0 ? allWorkers : undefined
+    );
     setResults(searchResults);
     setIsOpen(value.trim() !== "");
+
+    if (!hasFetchedWorkers) {
+      setHasFetchedWorkers(true);
+      fetchAllWorkers().then((fetched) => {
+        setAllWorkers(fetched);
+        // Refresh search results using fetched workers list
+        setResults(performLocalSearch(value, initialCategories, fetched));
+      });
+    }
   };
 
   const handleFocus = () => {
     if (query.trim() !== "") {
       setIsOpen(true);
+    }
+    if (!hasFetchedWorkers) {
+      setHasFetchedWorkers(true);
+      fetchAllWorkers().then(setAllWorkers);
     }
   };
 

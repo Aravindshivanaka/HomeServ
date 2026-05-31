@@ -4,3 +4,7 @@ import { twMerge } from "tailwind-merge"
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
+
+export function sanitizePhoneNumber(phone: string): string {
+  return phone.replace(/[^\d+]/g, "");
+}

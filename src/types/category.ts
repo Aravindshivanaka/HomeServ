@@ -23,6 +23,7 @@ export type CategoryIcon =
   | "brick-wall";
 
 export type Category = {
+  id?: string;
   slug: CategorySlug;
   name: string;
   titlePlural: string;

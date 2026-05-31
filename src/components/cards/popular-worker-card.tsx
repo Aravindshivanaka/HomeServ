@@ -1,10 +1,11 @@
-import Image from "next/image";
 import { BadgeCheck, Eye, Phone, Star } from "lucide-react";
 import Link from "next/link";
 
 import { layout } from "@/lib/layout";
 import type { PopularWorker } from "@/types";
 import { FavoriteButton } from "@/components/ui/favorite-button";
+import { SafeImage } from "@/components/ui/safe-image";
+import { sanitizePhoneNumber } from "@/lib/utils";
 
 type PopularWorkerCardProps = {
   worker: PopularWorker;
@@ -18,7 +19,7 @@ export function PopularWorkerCard({ worker }: PopularWorkerCardProps) {
       <FavoriteButton workerId={worker.id} className="absolute top-3 right-3 z-10" />
       <div className="flex gap-2.5 pr-8">
         <div className="relative shrink-0">
-          <Image
+          <SafeImage
             src={worker.imageUrl}
             alt=""
             width={56}
@@ -60,18 +61,28 @@ export function PopularWorkerCard({ worker }: PopularWorkerCardProps) {
       <div className="mt-3 grid grid-cols-2 gap-2">
         <Link
           href={`/worker/${worker.id}`}
-          className={`inline-flex ${layout.touchBtn} items-center justify-center gap-1.5 rounded-xl border border-[#E5E7EB] bg-white text-sm font-semibold text-[#111827] active:bg-[#F8FAFC]`}
+          className={`inline-flex min-h-[48px] ${layout.touchBtn} items-center justify-center gap-1.5 rounded-xl border border-[#E5E7EB] bg-white text-sm font-semibold text-[#111827] active:bg-[#F8FAFC]`}
         >
           <Eye className="size-4 shrink-0" aria-hidden />
           Profile
         </Link>
-        <button
-          type="button"
-          className={`inline-flex ${layout.touchBtn} items-center justify-center gap-1.5 rounded-xl bg-[#2563EB] text-sm font-semibold text-white active:bg-[#1D4ED8]`}
-        >
-          <Phone className="size-4 shrink-0" aria-hidden />
-          Call Now
-        </button>
+        {worker.isUnlocked ? (
+          <a
+            href={worker.phoneFull ? `tel:${sanitizePhoneNumber(worker.phoneFull)}` : undefined}
+            className={`inline-flex min-h-[48px] ${layout.touchBtn} items-center justify-center gap-1.5 rounded-xl bg-[#2563EB] text-sm font-semibold text-white active:bg-[#1D4ED8]`}
+          >
+            <Phone className="size-4 shrink-0" aria-hidden />
+            Call Now
+          </a>
+        ) : (
+          <Link
+            href={`/worker/${worker.id}`}
+            className={`inline-flex min-h-[48px] ${layout.touchBtn} items-center justify-center gap-1.5 rounded-xl bg-[#2563EB] text-sm font-semibold text-white active:bg-[#1D4ED8]`}
+          >
+            <Eye className="size-4 shrink-0" aria-hidden />
+            View Profile
+          </Link>
+        )}
       </div>
     </article>
   );

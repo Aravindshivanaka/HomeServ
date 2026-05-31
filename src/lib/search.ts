@@ -33,17 +33,21 @@ export type SearchResults = {
 };
 
 /**
- * Performs immediate local search filtering on static mock data.
+ * Performs immediate local search filtering on static mock data or custom database categories.
  * Matches: worker name, category fields, and services offered by the category.
  */
-export function performLocalSearch(query: string): SearchResults {
+export function performLocalSearch(
+  query: string,
+  customCategories?: Category[],
+  customWorkers?: Worker[]
+): SearchResults {
   const trimmed = query.trim();
   if (!trimmed) {
     return { categories: [], workers: [] };
   }
 
-  const allCategories = getAllCategories();
-  const allWorkers = getAllWorkers();
+  const allCategories = customCategories || getAllCategories();
+  const allWorkers = customWorkers || getAllWorkers();
 
   // 1. Filter categories
   const matchedCategories = allCategories.filter((cat) => {

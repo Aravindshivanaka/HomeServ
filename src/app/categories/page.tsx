@@ -1,10 +1,16 @@
+import type { Metadata } from "next";
 import { CategoryBrowseCard } from "@/components/cards/category-browse-card";
 import { MobileShell } from "@/components/layout/mobile-shell";
-import { getAllCategories } from "@/data/categories";
+import { fetchCategories } from "@/lib/categories";
 import { layout } from "@/lib/layout";
 
-export default function CategoriesPage() {
-  const categories = getAllCategories();
+export const metadata: Metadata = {
+  title: "All Service Categories — ServeHome",
+  description: "Browse verified local service categories near you. Find plumbers, electricians, carpenters, AC repair, painters, masons, and rental services in Jagtial.",
+};
+
+export default async function CategoriesPage() {
+  const categories = await fetchCategories();
 
   return (
     <MobileShell>

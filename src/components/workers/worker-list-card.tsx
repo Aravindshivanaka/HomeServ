@@ -1,4 +1,3 @@
-import Image from "next/image";
 import {
   BadgeCheck,
   Briefcase,
@@ -12,8 +11,9 @@ import Link from "next/link";
 
 import { layout } from "@/lib/layout";
 import type { Worker } from "@/types";
-import { cn } from "@/lib/utils";
+import { cn, sanitizePhoneNumber } from "@/lib/utils";
 import { FavoriteButton } from "@/components/ui/favorite-button";
+import { SafeImage } from "@/components/ui/safe-image";
 
 type WorkerListCardProps = {
   worker: Worker;
@@ -45,7 +45,7 @@ export function WorkerListCard({ worker }: WorkerListCardProps) {
 
       <div className="flex gap-2.5 pr-16">
         <div className="relative shrink-0">
-          <Image
+          <SafeImage
             src={worker.imageUrl}
             alt=""
             width={56}
@@ -116,27 +116,27 @@ export function WorkerListCard({ worker }: WorkerListCardProps) {
       <div className="mt-3 grid grid-cols-2 gap-2">
         <Link
           href={`/worker/${worker.id}`}
-          className={`inline-flex ${layout.touchBtn} items-center justify-center gap-1.5 rounded-xl border border-[#E5E7EB] bg-white text-sm font-medium text-[#111827] active:bg-[#F8FAFC]`}
+          className={`inline-flex min-h-[48px] ${layout.touchBtn} items-center justify-center gap-1.5 rounded-xl border border-[#E5E7EB] bg-white text-sm font-medium text-[#111827] active:bg-[#F8FAFC]`}
         >
           <Eye className="size-4 shrink-0" aria-hidden />
           View Profile
         </Link>
         {locked ? (
           <Link
-            href={`/unlock/${worker.categorySlug}`}
-            className={`inline-flex ${layout.touchBtn} items-center justify-center gap-1.5 rounded-xl bg-[#F97316] text-sm font-semibold text-white shadow-[0px_2px_8px_rgba(249,115,22,0.28)] active:bg-[#EA580C]`}
+            href={`/worker/${worker.id}`}
+            className={`inline-flex min-h-[48px] ${layout.touchBtn} items-center justify-center gap-1.5 rounded-xl bg-[#2563EB] text-sm font-semibold text-white active:bg-[#1D4ED8]`}
           >
-            <Lock className="size-4 shrink-0 text-white" strokeWidth={2.25} aria-hidden />
-            Unlock for Rs.10
+            <Eye className="size-4 shrink-0" aria-hidden />
+            View Profile
           </Link>
         ) : (
-          <button
-            type="button"
-            className={`inline-flex ${layout.touchBtn} items-center justify-center gap-1.5 rounded-xl bg-[#2563EB] text-sm font-semibold text-white active:bg-[#1D4ED8]`}
+          <a
+            href={worker.phoneFull ? `tel:${sanitizePhoneNumber(worker.phoneFull)}` : undefined}
+            className={`inline-flex min-h-[48px] ${layout.touchBtn} items-center justify-center gap-1.5 rounded-xl bg-[#2563EB] text-sm font-semibold text-white active:bg-[#1D4ED8]`}
           >
             <Phone className="size-4 shrink-0" aria-hidden />
             Call Now
-          </button>
+          </a>
         )}
       </div>
     </article>

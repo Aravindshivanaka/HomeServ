@@ -1,9 +1,9 @@
-import Image from "next/image";
 import { BadgeCheck, Briefcase, MapPin, Star } from "lucide-react";
 
 import { layout } from "@/lib/layout";
 import type { Worker } from "@/types";
 import { FavoriteButton } from "@/components/ui/favorite-button";
+import { SafeImage } from "@/components/ui/safe-image";
 
 type ProfileHeroCardProps = {
   worker: Worker;
@@ -17,7 +17,7 @@ export function ProfileHeroCard({ worker }: ProfileHeroCardProps) {
       <FavoriteButton workerId={worker.id} className="absolute top-3.5 right-3.5 z-10" />
       <div className="flex gap-3 pr-8">
         <div className="relative shrink-0">
-          <Image
+          <SafeImage
             src={worker.imageUrl}
             alt=""
             width={80}

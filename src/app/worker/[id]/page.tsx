@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { AboutSection } from "@/components/profile/about-section";
@@ -8,12 +9,24 @@ import { ProfilePageHeader } from "@/components/profile/profile-page-header";
 import { ReviewsSection } from "@/components/profile/reviews-section";
 import { ServicesSection } from "@/components/profile/services-section";
 import { MobileShell } from "@/components/layout/mobile-shell";
-import { getAllWorkerIds, getWorkerProfile } from "@/data";
+import { getAllWorkerIds } from "@/data";
+import { fetchWorkerProfile } from "@/lib/workers";
 import { layout } from "@/lib/layout";
 
 type WorkerProfilePageProps = {
   params: Promise<{ id: string }>;
 };
+
+export async function generateMetadata({ params }: WorkerProfilePageProps): Promise<Metadata> {
+  const { id } = await params;
+  const profile = await fetchWorkerProfile(id);
+  if (!profile) return {};
+  const { worker } = profile;
+  return {
+    title: `${worker.name} (${worker.categoryDisplay}) in Jagtial — ServeHome`,
+    description: `Call ${worker.name}, a verified ${worker.categoryDisplay.toLowerCase()} in ${worker.area}. With ${worker.yearsExperience} years of experience and a rating of ${worker.rating}.`,
+  };
+}
 
 export function generateStaticParams() {
   return getAllWorkerIds().map((id) => ({ id }));
@@ -23,7 +36,7 @@ export default async function WorkerProfilePage({
   params,
 }: WorkerProfilePageProps) {
   const { id } = await params;
-  const profile = getWorkerProfile(id);
+  const profile = await fetchWorkerProfile(id);
 
   if (!profile) {
     notFound();
