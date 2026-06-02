@@ -3,7 +3,7 @@ import { Poppins } from "next/font/google";
 
 import { AuthProvider } from "@/lib/auth-context";
 import { WishlistProvider } from "@/lib/wishlist-context";
-import { LoginModal } from "@/components/auth/login-modal";
+
 import "./globals.css";
 
 const poppins = Poppins({
@@ -37,7 +37,7 @@ export default function RootLayout({
         <AuthProvider>
           <WishlistProvider>
             {children}
-            <LoginModal />
+
           </WishlistProvider>
         </AuthProvider>
       </body>

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { cn } from "@/lib/utils";
 import { useWishlist } from "@/lib/wishlist-context";
-import { useAuth } from "@/lib/auth-context";
+import { isLoggedIn, saveRedirectUrl } from "@/lib/auth";
 
 type FavoriteButtonProps = {
   workerId: string;
@@ -14,7 +14,6 @@ type FavoriteButtonProps = {
 
 export function FavoriteButton({ workerId, className }: FavoriteButtonProps) {
   const { toggleWishlist, isFavorited } = useWishlist();
-  const { user } = useAuth();
   const router = useRouter();
   const isFavorite = isFavorited(workerId);
 
@@ -24,13 +23,13 @@ export function FavoriteButton({ workerId, className }: FavoriteButtonProps) {
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
-        
-        if (!user) {
-          localStorage.setItem("pending-wishlist-save", workerId);
+
+        if (!isLoggedIn()) {
+          saveRedirectUrl(window.location.pathname);
           router.push("/login");
           return;
         }
-        
+
         toggleWishlist(workerId);
       }}
       className={cn(

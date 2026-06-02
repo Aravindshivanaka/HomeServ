@@ -18,7 +18,7 @@ const iconMap = {
 export function BottomNav() {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, openLoginModal } = useAuth();
+  const { user } = useAuth();
 
   return (
     <nav
@@ -46,9 +46,8 @@ export function BottomNav() {
                 onClick={(e) => {
                   if (item.id === "profile" && !user) {
                     e.preventDefault();
-                    openLoginModal(() => {
-                      router.push(item.href);
-                    });
+                    localStorage.setItem("redirect_after_login", item.href);
+                    router.push("/login");
                   }
                 }}
                 className={cn(
