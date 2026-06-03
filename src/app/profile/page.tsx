@@ -1,6 +1,8 @@
 "use client";
+
 import { useEffect, useState } from "react";
-import { User, Phone, LogOut } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { User, Phone, LogOut, Home } from "lucide-react";
 import Link from "next/link";
 import { MobileShell } from "@/components/layout/mobile-shell";
 import { ProfileSectionCard } from "@/components/profile/profile-section-card";
@@ -8,6 +10,7 @@ import { layout } from "@/lib/layout";
 import { isLoggedIn, getUserPhone, logout } from "@/lib/auth";
 
 export default function ProfilePage() {
+  const router = useRouter();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -21,8 +24,22 @@ export default function ProfilePage() {
   return (
     <MobileShell>
       <div className={`flex flex-col ${layout.pageX}`}>
-        <header className="sticky top-0 z-40 -mx-4 border-b border-[#E5E7EB] bg-white px-4 py-2.5">
-          <h1 className="text-lg font-semibold text-[#111827]">My Profile</h1>
+        {/* Header Bar */}
+        <header className="sticky top-0 z-40 -mx-4 border-b border-[#E2E8F0] bg-white p-4 flex items-center justify-between">
+          <button
+            onClick={() => router.push("/")}
+            className="flex items-center justify-center size-11 rounded-xl hover:bg-gray-50 active:scale-95 transition-all focus:outline-none"
+            aria-label="Home"
+          >
+            <Home className="size-[22px] text-[#2563EB]" />
+          </button>
+          
+          <h1 className="text-lg font-semibold text-[#111827] absolute left-1/2 -translate-x-1/2">
+            My Profile
+          </h1>
+          
+          {/* Spacer to keep title centered */}
+          <div className="size-11 pointer-events-none" aria-hidden="true" />
         </header>
 
         <main className="flex flex-col gap-4 py-4 pb-8">

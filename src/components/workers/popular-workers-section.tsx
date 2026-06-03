@@ -1,6 +1,5 @@
 import { PopularWorkerCard } from "@/components/cards/popular-worker-card";
 import { SectionHeader } from "@/components/ui/section-header";
-import { getPopularWorkers } from "@/data";
 import type { PopularWorker } from "@/types";
 
 type PopularWorkersSectionProps = {
@@ -8,7 +7,7 @@ type PopularWorkersSectionProps = {
 };
 
 export function PopularWorkersSection({ initialWorkers }: PopularWorkersSectionProps) {
-  const workers = initialWorkers ?? getPopularWorkers();
+  const workers = initialWorkers ?? [];
 
   return (
     <section aria-labelledby="popular-workers-heading">

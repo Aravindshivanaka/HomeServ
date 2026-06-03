@@ -9,9 +9,9 @@ import { ProfilePageHeader } from "@/components/profile/profile-page-header";
 import { ReviewsSection } from "@/components/profile/reviews-section";
 import { ServicesSection } from "@/components/profile/services-section";
 import { MobileShell } from "@/components/layout/mobile-shell";
-import { getAllWorkerIds } from "@/data";
 import { fetchWorkerProfile } from "@/lib/workers";
 import { layout } from "@/lib/layout";
+import { supabase } from "@/lib/supabase";
 
 type WorkerProfilePageProps = {
   params: Promise<{ id: string }>;
@@ -28,8 +28,13 @@ export async function generateMetadata({ params }: WorkerProfilePageProps): Prom
   };
 }
 
-export function generateStaticParams() {
-  return getAllWorkerIds().map((id) => ({ id }));
+export async function generateStaticParams() {
+  try {
+    const { data } = await supabase.from("workers").select("id");
+    return (data || []).map((w) => ({ id: w.id }));
+  } catch {
+    return [];
+  }
 }
 
 export const dynamic = "force-dynamic";

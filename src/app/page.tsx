@@ -3,7 +3,7 @@ import { GreetingHeader } from "@/components/home/greeting-header";
 import { PromoBanner } from "@/components/home/promo-banner";
 import { SearchBar } from "@/components/home/search-bar";
 import { MobileShell } from "@/components/layout/mobile-shell";
-import { PopularWorkersSection } from "@/components/workers/popular-workers-section";
+import PopularWorkersSection from "@/components/PopularWorkersSection";
 import { fetchCategories } from "@/lib/categories";
 import { fetchPopularWorkers } from "@/lib/workers";
 import { layout } from "@/lib/layout";
@@ -28,7 +28,7 @@ export default async function HomePage() {
         <SearchBar initialCategories={categories} />
         <PromoBanner />
         <CategorySection primaryCategories={primary} expandedCategories={extra} />
-        <PopularWorkersSection initialWorkers={popularWorkers} />
+        <PopularWorkersSection workers={popularWorkers as any} />
       </main>
     </MobileShell>
   );

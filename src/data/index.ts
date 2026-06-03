@@ -59,11 +59,7 @@ export function toPopularWorker(worker: Worker): PopularWorker {
 }
 
 const popularWorkersCache = (() => {
-  const slugs: CategorySlug[] = ["plumber", "electrician", "carpenter"];
-  return slugs
-    .map((slug) => getWorkersByCategory(slug).find((w) => w.isUnlocked))
-    .filter((w): w is Worker => Boolean(w))
-    .map(toPopularWorker);
+  return getAllWorkers().map(toPopularWorker);
 })();
 
 /** First unlocked worker from top home categories */

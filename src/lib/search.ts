@@ -1,4 +1,4 @@
-import { getAllCategories, getAllWorkers } from "@/data";
+import { getAllCategories } from "@/data";
 import { servicesByCategory } from "@/data/workers/services-by-category";
 import type { Category, Worker } from "@/types";
 
@@ -47,7 +47,7 @@ export function performLocalSearch(
   }
 
   const allCategories = customCategories || getAllCategories();
-  const allWorkers = customWorkers || getAllWorkers();
+  const allWorkers = customWorkers || [];
 
   // 1. Filter categories
   const matchedCategories = allCategories.filter((cat) => {
