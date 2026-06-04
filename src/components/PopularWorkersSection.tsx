@@ -66,111 +66,116 @@ function WorkerRow({ workers, router }: { workers: Worker[], router: any }) {
   }, [workers])
 
   const scrollLeft = () => {
-    if (scrollRef.current) {
-      const container = scrollRef.current
-      const card = container.firstElementChild as HTMLElement
-      const scrollAmount = card ? card.clientWidth + 10 : 220
-      container.scrollLeft -= scrollAmount
+    if (!scrollRef.current) return
+    const start = scrollRef.current.scrollLeft
+    const target = start - 230
+    const duration = 400
+    const startTime = performance.now()
+    const ease = (t: number) => t < 0.5 ? 2*t*t : -1+(4-2*t)*t
+    const animate = (currentTime: number) => {
+      const elapsed = currentTime - startTime
+      const progress = Math.min(elapsed / duration, 1)
+      scrollRef.current!.scrollLeft = start + (target - start) * ease(progress)
+      if (progress < 1) requestAnimationFrame(animate)
     }
+    requestAnimationFrame(animate)
   }
+
   const scrollRight = () => {
-    if (scrollRef.current) {
-      const container = scrollRef.current
-      const card = container.firstElementChild as HTMLElement
-      const scrollAmount = card ? card.clientWidth + 10 : 220
-      container.scrollLeft += scrollAmount
+    if (!scrollRef.current) return
+    const start = scrollRef.current.scrollLeft
+    const target = start + 230
+    const duration = 400
+    const startTime = performance.now()
+    const ease = (t: number) => t < 0.5 ? 2*t*t : -1+(4-2*t)*t
+    const animate = (currentTime: number) => {
+      const elapsed = currentTime - startTime
+      const progress = Math.min(elapsed / duration, 1)
+      scrollRef.current!.scrollLeft = start + (target - start) * ease(progress)
+      if (progress < 1) requestAnimationFrame(animate)
     }
+    requestAnimationFrame(animate)
   }
 
   return (
     <div style={{ marginBottom:'16px', padding:'0 16px' }}>
-      <div style={{ display:'flex', alignItems:'center', gap:'6px' }}>
+      <div style={{ position:'relative' }}>
 
-        {/* LEFT ARROW */}
-        {!atStart ? (
-          <button onClick={scrollLeft} disabled={atStart}
+        {/* Scrollable cards — full width */}
+        <div ref={scrollRef} onScroll={handleScroll}
+          style={{
+            display:'flex', gap:'10px',
+            overflowX:'auto',
+            WebkitOverflowScrolling:'touch',
+            scrollbarWidth:'none', msOverflowStyle:'none',
+            paddingBottom:'2px'
+          }}>
+          {workers.map((worker) => (
+            <div key={worker.id} style={{
+              minWidth:'72%', flexShrink:0
+            }}>
+              <WorkerCard worker={worker} router={router} />
+            </div>
+          ))}
+        </div>
+
+        {/* LEFT ARROW — overlaid on left edge, only when not at start */}
+        {!atStart && (
+          <button onClick={scrollLeft}
             style={{
-              width:'36px', height:'36px', borderRadius:'50%', flexShrink:0,
-              border:'1px solid rgba(255,255,255,0.4)',
-              background:'rgba(255,255,255,0.25)',
-              backdropFilter:'blur(8px)',
-              WebkitBackdropFilter:'blur(8px)',
-              cursor: atStart ? 'not-allowed' : 'pointer',
-              fontSize:'16px', fontWeight:'bold',
-              color: atStart ? '#CBD5E1' : '#2563EB',
-              opacity: atStart ? 0.5 : 1,
+              position:'absolute', left:'4px',
+              top:'50%', transform:'translateY(-50%)',
+              width:'32px', height:'32px', borderRadius:'50%',
+              border:'1px solid rgba(255,255,255,0.5)',
+              background:'rgba(255,255,255,0.35)',
+              backdropFilter:'blur(10px)',
+              WebkitBackdropFilter:'blur(10px)',
+              cursor:'pointer', fontSize:'15px', fontWeight:'bold',
+              color:'#2563EB', zIndex:10,
               display:'flex', alignItems:'center', justifyContent:'center',
-              boxShadow:'0 2px 8px rgba(0,0,0,0.10)',
-              transition:'opacity 0.2s'
+              boxShadow:'0 2px 8px rgba(0,0,0,0.12)'
             }}>
             ←
           </button>
-        ) : null}
+        )}
 
-        {/* SCROLL AREA with right fade overlay */}
-        <div style={{ flex:1, position:'relative', overflow:'hidden' }}>
-
-          {/* Scrollable cards */}
-          <div ref={scrollRef} onScroll={handleScroll}
-            style={{
-              display:'flex', gap:'10px',
-              overflowX:'auto', scrollSnapType:'x mandatory',
-              scrollBehavior:'smooth',
-              WebkitOverflowScrolling:'touch',
-              scrollbarWidth:'none', msOverflowStyle:'none',
-              paddingBottom:'2px'
-            }}>
-            {workers.map((worker) => (
-              <div key={worker.id} style={{
-                minWidth:'78%', scrollSnapAlign:'start', flexShrink:0
-              }}>
-                <WorkerCard worker={worker} router={router} />
-              </div>
-            ))}
-          </div>
-
-          {/* RIGHT FADE GRADIENT OVERLAY — shows more content hint */}
-          {!atEnd && (
-            <div style={{
-              position:'absolute', top:0, right:0,
-              width:'60px', height:'100%', pointerEvents:'none',
-              background:'linear-gradient(to right, rgba(248,250,252,0) 0%, rgba(248,250,252,0.85) 60%, rgba(248,250,252,1) 100%)',
-              zIndex: 10
-            }} />
-          )}
-
-          {/* LEFT FADE GRADIENT OVERLAY */}
-          {!atStart && (
-            <div style={{
-              position:'absolute', top:0, left:0,
-              width:'30px', height:'100%', pointerEvents:'none',
-              background:'linear-gradient(to left, rgba(248,250,252,0) 0%, rgba(248,250,252,0.7) 100%)',
-              zIndex: 10
-            }} />
-          )}
-
-        </div>
-
-        {/* RIGHT ARROW */}
-        {!atEnd ? (
+        {/* RIGHT ARROW — overlaid on right edge, only when not at end */}
+        {!atEnd && (
           <button onClick={scrollRight}
             style={{
-              width:'36px', height:'36px', borderRadius:'50%', flexShrink:0,
-              border:'1px solid rgba(255,255,255,0.4)',
-              background:'rgba(255,255,255,0.25)',
-              backdropFilter:'blur(8px)',
-              WebkitBackdropFilter:'blur(8px)',
-              cursor: atEnd ? 'not-allowed' : 'pointer',
-              fontSize:'16px', fontWeight:'bold',
-              color: atEnd ? '#CBD5E1' : '#2563EB',
-              opacity: atEnd ? 0.5 : 1,
+              position:'absolute', right:'4px',
+              top:'50%', transform:'translateY(-50%)',
+              width:'32px', height:'32px', borderRadius:'50%',
+              border:'1px solid rgba(255,255,255,0.5)',
+              background:'rgba(255,255,255,0.35)',
+              backdropFilter:'blur(10px)',
+              WebkitBackdropFilter:'blur(10px)',
+              cursor:'pointer', fontSize:'15px', fontWeight:'bold',
+              color:'#2563EB', zIndex:10,
               display:'flex', alignItems:'center', justifyContent:'center',
-              boxShadow:'0 2px 8px rgba(0,0,0,0.10)',
-              transition:'opacity 0.2s'
+              boxShadow:'0 2px 8px rgba(0,0,0,0.12)'
             }}>
             →
           </button>
-        ) : null}
+        )}
+
+        {/* RIGHT FADE GRADIENT */}
+        {!atEnd && (
+          <div style={{
+            position:'absolute', top:0, right:0,
+            width:'60px', height:'100%', pointerEvents:'none',
+            background:'linear-gradient(to right, rgba(248,250,252,0) 0%, rgba(248,250,252,0.85) 60%, rgba(248,250,252,1) 100%)'
+          }} />
+        )}
+
+        {/* LEFT FADE GRADIENT */}
+        {!atStart && (
+          <div style={{
+            position:'absolute', top:0, left:0,
+            width:'30px', height:'100%', pointerEvents:'none',
+            background:'linear-gradient(to left, rgba(248,250,252,0) 0%, rgba(248,250,252,0.7) 100%)'
+          }} />
+        )}
 
       </div>
     </div>
