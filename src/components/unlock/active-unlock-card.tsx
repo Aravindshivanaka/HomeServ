@@ -2,7 +2,6 @@ import { Clock, Phone, Users } from "lucide-react";
 import Link from "next/link";
 
 import { getCategoryIcon } from "@/lib/category-icons";
-import { getCategoryBySlug } from "@/data/categories";
 import { layout } from "@/lib/layout";
 import type { UserUnlock } from "@/types";
 
@@ -11,8 +10,7 @@ type ActiveUnlockCardProps = {
 };
 
 export function ActiveUnlockCard({ unlock }: ActiveUnlockCardProps) {
-  const category = getCategoryBySlug(unlock.categorySlug);
-  const Icon = category ? getCategoryIcon(category.icon) : null;
+  const Icon = getCategoryIcon("wrench");
 
   const expiryText =
     unlock.daysRemaining > 0
@@ -25,18 +23,16 @@ export function ActiveUnlockCard({ unlock }: ActiveUnlockCardProps) {
       className={`block ${layout.roundedCard} border border-[#BFDBFE] bg-[#EFF6FF] p-3.5 ${layout.cardShadow} active:bg-[#DBEAFE]`}
     >
       <div className="flex items-center gap-3">
-        {Icon && category ? (
-          <div
-            className="flex size-11 shrink-0 items-center justify-center rounded-xl"
-            style={{ backgroundColor: category.iconBg }}
-          >
-            <Icon
-              className="size-5"
-              style={{ color: category.iconColor }}
-              aria-hidden
-            />
-          </div>
-        ) : null}
+        <div
+          className="flex size-11 shrink-0 items-center justify-center rounded-xl"
+          style={{ backgroundColor: "#DBEAFE" }}
+        >
+          <Icon
+            className="size-5"
+            style={{ color: "#2563EB" }}
+            aria-hidden
+          />
+        </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <h3 className="text-base font-semibold leading-5 text-[#111827]">

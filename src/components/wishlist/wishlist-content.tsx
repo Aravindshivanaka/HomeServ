@@ -1,7 +1,6 @@
 "use client";
 
 import { useWishlist } from "@/lib/wishlist-context";
-import { getWorkerById } from "@/data/workers";
 import { UnlockedWorkerContactCard } from "@/components/unlock/unlocked-worker-contact-card";
 import { EmptyWishlistState } from "@/components/wishlist/empty-wishlist-state";
 import { layout } from "@/lib/layout";
@@ -24,10 +23,8 @@ export function WishlistContent() {
     return <EmptyWishlistState />;
   }
 
-  // Get full worker objects for the favorited IDs
-  const favoritedWorkers = wishlist
-    .map((id) => getWorkerById(id))
-    .filter((w): w is NonNullable<typeof w> => w !== undefined);
+  // Get full worker objects for the favorited IDs (mock data removed)
+  const favoritedWorkers: any[] = [];
 
   return (
     <div className={`flex flex-col ${layout.sectionGap}`}>

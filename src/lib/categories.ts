@@ -1,96 +1,68 @@
 import { supabase } from "@/lib/supabase";
-import {
-  getAllCategorySlugs,
-  getCategoryListing,
-  isValidCategorySlug,
-  getCategoryBySlug,
-  categories as mockCategories,
-} from "@/data";
 import type { Category } from "@/types";
 
+const CATEGORY_SLUGS = [
+  "plumber",
+  "ac-repair",
+  "carpenter",
+  "electrician",
+  "auto-rental",
+  "welder",
+  "car-rental",
+  "painter",
+  "mason",
+];
+
+function toCategory(item: any, workerCount: number = 0): Category {
+  return {
+    id: item.id,
+    name: item.name,
+    slug: item.slug,
+    icon: item.icon || "wrench",
+    titlePlural: `${item.name}s`,
+    label: item.slug.toUpperCase(),
+    workerCount,
+    iconBg: "#DBEAFE",
+    iconColor: "#2563EB",
+  };
+}
+
+export async function getAllCategories(): Promise<Category[]> {
+  const { data, error } = await supabase
+    .from("categories")
+    .select("id, name, slug, icon, workers(count)")
+    .order("name");
+
+  if (error || !data) return [];
+  return data.map((item: any) => {
+    const count = item.workers?.[0]?.count || 0;
+    return toCategory(item, count);
+  });
+}
+
+export async function getCategoryBySlug(slug: string): Promise<Category | null> {
+  const { data, error } = await supabase
+    .from("categories")
+    .select("id, name, slug, icon")
+    .eq("slug", slug)
+    .single();
+
+  if (error || !data) return null;
+  return toCategory(data);
+}
+
 export function getCategorySlugs(): string[] {
-  return getAllCategorySlugs();
+  return CATEGORY_SLUGS;
 }
 
-export function getCategoryListingBySlug(slug: string) {
-  return getCategoryListing(slug);
+export function isValidCategorySlug(slug: string): boolean {
+  return getCategorySlugs().includes(slug);
 }
 
-export { isValidCategorySlug };
-
-/**
- * Fetch all categories from Supabase 'categories' table.
- * If empty or error occurs, gracefully falls back to mock categories data.
- */
 export async function fetchCategories(): Promise<Category[]> {
-  try {
-    const { data, error } = await supabase
-      .from("categories")
-      .select("id, name, slug, icon");
-
-    if (error) {
-      console.error("Error fetching categories from Supabase:", error);
-      return mockCategories;
-    }
-
-    if (!data || data.length === 0) {
-      console.log("Supabase categories table is empty. Falling back to mock categories.");
-      return mockCategories;
-    }
-
-    return data.map((item) => {
-      const mockVisuals = getCategoryBySlug(item.slug);
-      return {
-        id: item.id,
-        slug: item.slug as any,
-        name: item.name,
-        titlePlural: mockVisuals?.titlePlural ?? `${item.name}s`,
-        label: mockVisuals?.label ?? item.slug.toUpperCase(),
-        workerCount: mockVisuals?.workerCount ?? 0,
-        icon: (item.icon || mockVisuals?.icon || "wrench") as any,
-        iconBg: mockVisuals?.iconBg ?? "#DBEAFE",
-        iconColor: mockVisuals?.iconColor ?? "#2563EB",
-      };
-    });
-  } catch (err) {
-    console.error("Failed to fetch categories from Supabase:", err);
-    return mockCategories;
-  }
+  return getAllCategories();
 }
 
-/**
- * Fetch a single category by slug from Supabase.
- * Falls back to mock category if not found or database fails.
- */
 export async function fetchCategoryBySlug(slug: string): Promise<Category | null> {
-  try {
-    const { data, error } = await supabase
-      .from("categories")
-      .select("id, name, slug, icon")
-      .eq("slug", slug)
-      .maybeSingle();
-
-    if (error || !data) {
-      if (error) {
-        console.error(`Error fetching category ${slug} from Supabase:`, error);
-      }
-      return getCategoryBySlug(slug) ?? null;
-    }
-
-    const mockVisuals = getCategoryBySlug(data.slug);
-    return {
-      id: data.id,
-      slug: data.slug as any,
-      name: data.name,
-      titlePlural: mockVisuals?.titlePlural ?? `${data.name}s`,
-      label: mockVisuals?.label ?? data.slug.toUpperCase(),
-      workerCount: mockVisuals?.workerCount ?? 0,
-      icon: (data.icon || mockVisuals?.icon || "wrench") as any,
-      iconBg: mockVisuals?.iconBg ?? "#DBEAFE",
-      iconColor: mockVisuals?.iconColor ?? "#2563EB",
-    };
-  } catch (err) {
-    console.error(`Failed to fetch category by slug ${slug}:`, err);
-    return getCategoryBySlug(slug) ?? null;
-  }
+  return getCategoryBySlug(slug);
 }

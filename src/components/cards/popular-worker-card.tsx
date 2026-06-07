@@ -12,9 +12,6 @@ type PopularWorkerCardProps = {
 };
 
 export function PopularWorkerCard({ worker }: PopularWorkerCardProps) {
-  const categorySlug = worker.category ? worker.category.toLowerCase().replace(/\s+/g, "-") : "plumber";
-  const fallbackPhoto = `/workers/${categorySlug}-1.svg`;
-
   return (
     <article
       className="relative w-[160px] max-w-[160px] shrink-0 bg-white border border-[#E5E7EB] rounded-2xl p-3 flex flex-col justify-between shadow-[0px_2px_8px_rgba(17,24,39,0.03)] snap-start hover:shadow-[0px_4px_12px_rgba(17,24,39,0.06)] transition-all duration-200"
@@ -29,12 +26,12 @@ export function PopularWorkerCard({ worker }: PopularWorkerCardProps) {
         {/* Photo */}
         <div className="relative size-14 shrink-0 bg-gray-100 rounded-full overflow-hidden">
           <SafeImage
-            src={worker.imageUrl || fallbackPhoto}
+            src={worker.imageUrl}
             alt={worker.name}
             width={56}
             height={56}
             className="rounded-full object-cover border border-gray-50 size-14"
-            fallbackSrc={fallbackPhoto}
+            fallbackText={worker.name}
           />
           {worker.isVerified && (
             <span

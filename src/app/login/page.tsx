@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { getAndClearRedirectUrl } from "@/lib/auth";
+import { getUserByPhone, saveUserName } from "@/lib/users";
 
 import { MobileShell } from "@/components/layout/mobile-shell";
 
@@ -11,6 +12,7 @@ export default function LoginPage() {
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [step, setStep] = useState(1);
+  const [enteredName, setEnteredName] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
   const { login } = useAuth();
@@ -24,16 +26,48 @@ export default function LoginPage() {
     } else setError("Please enter a valid 10-digit number");
   };
 
-  const handleVerify = (e: React.FormEvent) => {
+  const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
     if (otp === "123456") {
-      login("+91" + phone);
-      const redirectUrl = getAndClearRedirectUrl();
-      router.push(redirectUrl);
+      const fullPhone = "+91" + phone;
+      try {
+        const userObj = await getUserByPhone(fullPhone);
+        if (userObj && userObj.display_name) {
+          login(fullPhone);
+          localStorage.setItem("user_name", userObj.display_name);
+          const redirectUrl = getAndClearRedirectUrl();
+          router.push(redirectUrl);
+        } else {
+          setStep(3);
+        }
+      } catch (err) {
+        console.error("Error during verification:", err);
+        setStep(3);
+      }
     } else setError("Wrong OTP. Use 123456 for testing");
   };
 
+  const handleNameSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const finalName = enteredName.trim().length >= 2 ? enteredName.trim() : "Friend";
+    const fullPhone = "+91" + phone;
+    try {
+      await saveUserName(fullPhone, finalName);
+      login(fullPhone);
+      localStorage.setItem("user_name", finalName);
+      const redirectUrl = getAndClearRedirectUrl();
+      router.push(redirectUrl);
+    } catch (err) {
+      console.error("Error saving name:", err);
+      login(fullPhone);
+      localStorage.setItem("user_name", finalName);
+      const redirectUrl = getAndClearRedirectUrl();
+      router.push(redirectUrl);
+    }
+  };
+
   const phoneValid = phone.length === 10;
+  const isNameInvalid = enteredName.trim().length > 0 && enteredName.trim().length < 2;
 
   return (
     <MobileShell>
@@ -71,7 +105,7 @@ export default function LoginPage() {
               Send OTP
             </button>
           </form>
-        ) : (
+        ) : step === 2 ? (
           <form onSubmit={handleVerify} className="space-y-4">
             <h1 className="text-xl font-bold">Enter OTP</h1>
             <p className="text-sm text-gray-600">OTP sent to +91 {phone}</p>
@@ -88,6 +122,36 @@ export default function LoginPage() {
             />
             <button className="w-full p-3 bg-blue-600 text-white rounded-xl font-semibold" type="submit">Verify OTP</button>
             <button type="button" onClick={() => alert("OTP is 123456 (test mode)")} className="text-blue-600 text-sm block text-center w-full">Resend OTP</button>
+          </form>
+        ) : (
+          <form onSubmit={handleNameSubmit} className="space-y-4">
+            <h1 className="text-xl font-bold">What should we call you?</h1>
+            <p className="text-sm text-gray-600">Please enter your name to personalize your experience.</p>
+            <input
+              className="w-full p-3 border rounded-xl"
+              type="text"
+              maxLength={20}
+              placeholder="Enter your name"
+              value={enteredName}
+              onChange={(e) => setEnteredName(e.target.value)}
+            />
+            <button
+              className="w-full p-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50"
+              type="submit"
+              disabled={isNameInvalid}
+            >
+              Continue
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setEnteredName("Friend");
+                handleNameSubmit();
+              }}
+              className="text-blue-600 text-sm block text-center w-full mt-2 hover:underline"
+            >
+              Skip for now
+            </button>
           </form>
         )}
       </main>

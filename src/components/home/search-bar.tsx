@@ -8,6 +8,7 @@ import { layout } from "@/lib/layout";
 import { getCategoryIcon } from "@/lib/category-icons";
 import { performLocalSearch, type SearchResults } from "@/lib/search";
 import { fetchAllWorkers } from "@/lib/workers";
+import { SafeImage } from "@/components/ui/safe-image";
 import type { Category, Worker } from "@/types";
 
 export function SearchBar({ initialCategories }: { initialCategories?: Category[] }) {
@@ -157,13 +158,14 @@ export function SearchBar({ initialCategories }: { initialCategories?: Category[
                       className="flex items-center gap-3 rounded-xl p-2 hover:bg-[#F8FAFC] active:bg-[#F3F4F6] transition-colors"
                     >
                       <div className="relative size-10 shrink-0">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
+                        <SafeImage
                           src={worker.imageUrl}
-                          alt=""
+                          alt={worker.name}
+                          width={40}
+                          height={40}
                           loading="lazy"
-                          decoding="async"
                           className="size-10 rounded-full object-cover"
+                          fallbackText={worker.name}
                         />
                         {worker.isVerified && (
                           <span

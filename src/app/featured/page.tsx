@@ -79,8 +79,6 @@ export default function FeaturedWorkersPage() {
             {workers.map((w) => {
               const categoryObj = w.categories as any;
               const categoryName = categoryObj?.name || "Worker";
-              const categorySlug = categoryObj?.slug || "plumber";
-              const fallbackPhoto = `/workers/${categorySlug}-1.svg`;
 
               return (
                 <div
@@ -90,12 +88,12 @@ export default function FeaturedWorkersPage() {
                   <div className="flex gap-4 items-start">
                     <div className="relative size-16 shrink-0 bg-gray-100 rounded-full overflow-hidden">
                       <SafeImage
-                        src={w.image_url || fallbackPhoto}
+                        src={w.image_url}
                         alt={w.name}
                         width={64}
                         height={64}
                         className="rounded-full object-cover border border-[#F3F4F6] size-16"
-                        fallbackSrc={fallbackPhoto}
+                        fallbackText={w.name}
                       />
                       {w.verified && (
                         <span

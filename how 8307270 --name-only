@@ -1,0 +1,44 @@
+[33mcommit 39fd245cd90017d5a9893dae8aba8311ecd34bbb[m
+Author: Aravind <arvindremo9@gmail.com>
+Date:   Sun May 31 16:44:57 2026 +0530
+
+    Production optimization pass complete
+
+next.config.ts
+package-lock.json
+package.json
+src/app/(admin)/admin/workers/[id]/edit/page.tsx
+src/app/(admin)/admin/workers/add/page.tsx
+src/app/(admin)/admin/workers/page.tsx
+src/app/(admin)/layout.tsx
+src/app/admin-login/layout.tsx
+src/app/admin-login/page.tsx
+src/app/categories/page.tsx
+src/app/category/[slug]/loading.tsx
+src/app/category/[slug]/page.tsx
+src/app/loading.tsx
+src/app/page.tsx
+src/app/worker/[id]/loading.tsx
+src/app/worker/[id]/page.tsx
+src/components/admin/delete-worker-dialog.tsx
+src/components/admin/image-upload.tsx
+src/components/admin/worker-form.tsx
+src/components/cards/popular-worker-card.tsx
+src/components/home/category-section.tsx
+src/components/home/search-bar.tsx
+src/components/profile/profile-hero-card.tsx
+src/components/ui/safe-image.tsx
+src/components/workers/popular-workers-section.tsx
+src/components/workers/worker-list-card.tsx
+src/components/workers/worker-list.tsx
+src/data/workers/profile-details.ts
+src/lib/admin-auth.tsx
+src/lib/admin-workers.ts
+src/lib/categories.ts
+src/lib/category-icons.tsx
+src/lib/search.ts
+src/lib/supabase.ts
+src/lib/utils.ts
+src/lib/workers.ts
+src/types/category.ts
+src/types/worker.ts

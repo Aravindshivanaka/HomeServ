@@ -38,16 +38,18 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   }
 
   const workers = await fetchWorkersByCategory(category.slug);
+  const capitalise = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+  const displayName = category.name === "welder" ? "Welders" : capitalise(category.titlePlural);
 
   return (
     <MobileShell>
       <div className={`flex flex-col ${layout.pageX}`}>
         <CategoryPageHeader
-          title={category.titlePlural}
+          title={displayName}
           workerCount={workers.length}
         />
         <main className={`flex flex-col ${layout.sectionGap} py-3`}>
-          <FreeUnlockCounter remaining={2} />
+          <FreeUnlockCounter remaining={workers.filter((w: any) => w.isUnlocked).length} />
           <WorkerList workers={workers} />
         </main>
       </div>

@@ -8,14 +8,30 @@ import { MobileShell } from "@/components/layout/mobile-shell";
 import { ProfileSectionCard } from "@/components/profile/profile-section-card";
 import { layout } from "@/lib/layout";
 import { isLoggedIn, getUserPhone, logout } from "@/lib/auth";
+import { saveUserName } from "@/lib/users";
 
 export default function ProfilePage() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
+  const [userName, setUserName] = useState("");
+  const [editing, setEditing] = useState(false);
+  const [editValue, setEditValue] = useState("");
 
   useEffect(() => {
     setMounted(true);
+    const name = localStorage.getItem("user_name") || "";
+    setUserName(name);
+    setEditValue(name);
   }, []);
+
+  const saveName = async () => {
+    if (editValue.trim().length < 2) return;
+    const phone = localStorage.getItem("user_phone") || "";
+    await saveUserName(phone, editValue.trim());
+    localStorage.setItem("user_name", editValue.trim());
+    setUserName(editValue.trim());
+    setEditing(false);
+  };
 
   if (!mounted) return null;
   const loggedIn = isLoggedIn();
@@ -59,11 +75,76 @@ export default function ProfilePage() {
                     <User className="size-6 text-[#2563EB]" aria-hidden />
                   </div>
                   <div>
-                    <p className="font-semibold text-[#111827]">Trusted User</p>
+                    <p className="font-semibold text-[#111827]">{userName || "Trusted User"}</p>
                     <p className="text-sm text-[#6B7280] flex items-center gap-1 mt-0.5">
                       <Phone className="size-3" aria-hidden /> {phone}
                     </p>
                   </div>
+                </div>
+
+                <div className="mt-4 pt-3 border-t border-gray-100">
+                  <p className="text-xs font-semibold text-[#6B7280] uppercase tracking-wider mb-1">
+                    Your Name
+                  </p>
+                  {!editing ? (
+                    <div className="flex items-center gap-2">
+                      <span className="text-[#111827] font-medium">
+                        {userName || "Friend"}
+                      </span>
+                      <button
+                        onClick={() => {
+                          setEditValue(userName);
+                          setEditing(true);
+                        }}
+                        className="p-1 hover:bg-gray-100 rounded-lg transition-all"
+                        aria-label="Edit name"
+                      >
+                        ✏️
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-2 mt-1">
+                      <input
+                        type="text"
+                        value={editValue}
+                        onChange={(e) => setEditValue(e.target.value)}
+                        placeholder="Enter your name"
+                        className="w-full text-sm text-[#111827] outline-none"
+                        style={{
+                          border: "1px solid #DBEAFE",
+                          borderRadius: "8px",
+                          padding: "10px",
+                        }}
+                      />
+                      <div className="flex gap-2">
+                        <button
+                          onClick={saveName}
+                          disabled={editValue.trim().length < 2}
+                          className="text-sm font-semibold transition-colors disabled:opacity-50"
+                          style={{
+                            backgroundColor: "#22C55E",
+                            color: "white",
+                            borderRadius: "8px",
+                            padding: "8px 16px",
+                          }}
+                        >
+                          Save
+                        </button>
+                        <button
+                          onClick={() => setEditing(false)}
+                          className="text-sm font-semibold transition-colors"
+                          style={{
+                            backgroundColor: "#F1F5F9",
+                            color: "#374151",
+                            borderRadius: "8px",
+                            padding: "8px 16px",
+                          }}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </ProfileSectionCard>
 

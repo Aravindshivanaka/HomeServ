@@ -4,10 +4,6 @@ import { CategoryCard } from "@/components/cards/category-card";
 import { MoreCategoryCard } from "@/components/cards/more-category-card";
 import { ViewAllCategoryCard } from "@/components/cards/view-all-category-card";
 import { SectionHeader } from "@/components/ui/section-header";
-import {
-  getHomeExpandedCategories,
-  getHomePrimaryCategories,
-} from "@/data/categories";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import type { Category } from "@/types";
@@ -22,8 +18,9 @@ export function CategorySection({
   expandedCategories,
 }: CategorySectionProps) {
   const [expanded, setExpanded] = useState(false);
-  const primary = primaryCategories ?? getHomePrimaryCategories();
-  const extra = expandedCategories ?? getHomeExpandedCategories();
+  const categories = [...(primaryCategories ?? []), ...(expandedCategories ?? [])];
+  const primary = primaryCategories ?? categories.slice(0, 5);
+  const extra = expandedCategories ?? categories.slice(5);
 
   return (
     <section aria-labelledby="categories-heading">

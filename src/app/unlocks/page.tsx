@@ -34,7 +34,7 @@ export default function WishlistPage() {
               name: w.name,
               location: w.location,
               experience: w.experience,
-              imageUrl: w.image_url || `/workers/${(w.categories as any)?.slug || "plumber"}-1.svg`,
+              imageUrl: w.image_url || "",
               categoryName: (w.categories as any)?.name || "Worker",
             })));
           } else {
@@ -88,6 +88,7 @@ export default function WishlistPage() {
                       width={48}
                       height={48}
                       className="rounded-full object-cover size-12 border border-gray-100"
+                      fallbackText={w.name}
                     />
                   </div>
                   <div>

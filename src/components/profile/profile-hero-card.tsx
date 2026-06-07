@@ -23,6 +23,7 @@ export function ProfileHeroCard({ worker }: ProfileHeroCardProps) {
             width={80}
             height={80}
             className="size-20 rounded-xl object-cover"
+            fallbackText={worker.name}
             priority
             sizes="80px"
           />

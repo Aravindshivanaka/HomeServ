@@ -9,7 +9,6 @@ import { TrustSection } from "@/components/unlock/trust-section";
 import { UnlockFlow } from "@/components/unlock/unlock-flow";
 import { UnlockHero } from "@/components/unlock/unlock-hero";
 import { UnlockSummaryCard } from "@/components/unlock/unlock-summary-card";
-import { getUnlockPageData } from "@/data/unlock";
 import { layout } from "@/lib/layout";
 import { isLoggedIn, getUserPhone } from "@/lib/auth";
 import { useAuth } from "@/lib/auth-context";
@@ -80,7 +79,29 @@ export default function UnlockPage() {
     );
   }
 
-  const data = getUnlockPageData(category);
+  const categoryName =
+    category.charAt(0).toUpperCase() + category.slice(1).replace(/-/g, " ");
+  const unlockData = {
+    categoryName,
+    amount: 10,
+    accessDays: 3,
+  };
+  const data = {
+    category: {
+      name: unlockData.categoryName,
+      slug: category as any,
+      icon: "wrench" as const,
+      titlePlural: `${unlockData.categoryName}s`,
+      label: category.toUpperCase(),
+      workerCount: 0,
+      iconBg: "#DBEAFE",
+      iconColor: "#2563EB",
+    },
+    durationDays: unlockData.accessDays,
+    feeInr: unlockData.amount,
+    benefits: [],
+    trustPoints: [],
+  };
 
   return (
     <MobileShell>

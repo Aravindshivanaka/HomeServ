@@ -1,12 +1,10 @@
-import Image from "next/image";
 import { BadgeCheck, Eye, MapPin, Phone, Star } from "lucide-react";
 import Link from "next/link";
 
 import { layout } from "@/lib/layout";
 import type { Worker } from "@/types";
-import { buildProfileDetails } from "@/data/workers/profile-details";
 import { FavoriteButton } from "@/components/ui/favorite-button";
-import { cn } from "@/lib/utils";
+import { SafeImage } from "@/components/ui/safe-image";
 
 type UnlockedWorkerContactCardProps = {
   worker: Worker;
@@ -15,8 +13,7 @@ type UnlockedWorkerContactCardProps = {
 export function UnlockedWorkerContactCard({
   worker,
 }: UnlockedWorkerContactCardProps) {
-  const details = buildProfileDetails(worker);
-  const phoneNumber = details.phoneFull;
+  const phoneNumber = worker.phoneFull;
 
   return (
     <article
@@ -33,12 +30,13 @@ export function UnlockedWorkerContactCard({
       
       <div className="flex gap-2.5 pr-16">
         <div className="relative shrink-0">
-          <Image
+          <SafeImage
             src={worker.imageUrl}
             alt=""
             width={56}
             height={56}
             className="size-14 rounded-full object-cover"
+            fallbackText={worker.name}
             loading="lazy"
             sizes="56px"
           />

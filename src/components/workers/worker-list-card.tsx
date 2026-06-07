@@ -54,6 +54,7 @@ export function WorkerListCard({ worker }: WorkerListCardProps) {
               "size-14 rounded-full object-cover",
               locked && "opacity-90 grayscale-[0.15]"
             )}
+            fallbackText={worker.name}
             loading="lazy"
             sizes="56px"
           />

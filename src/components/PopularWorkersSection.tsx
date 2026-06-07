@@ -1,6 +1,7 @@
 'use client'
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { SafeImage } from '@/components/ui/safe-image'
 
 interface Worker {
   id: string
@@ -255,13 +256,15 @@ function WorkerCard({ worker, router }: { worker: Worker, router: any }) {
           background:'#EFF6FF', flexShrink:0, overflow:'hidden',
           display:'flex', alignItems:'center', justifyContent:'center'
         }}>
-          {imageUrl ? (
-            <img src={imageUrl} alt={worker.name}
-              style={{ width:'100%', height:'100%', objectFit:'cover' }}
-              loading="lazy" />
-          ) : (
-            <span style={{ fontSize:'20px' }}>👤</span>
-          )}
+          <SafeImage
+            src={imageUrl || ""}
+            alt={worker.name}
+            width={48}
+            height={48}
+            fallbackText={worker.name}
+            style={{ width:'100%', height:'100%', objectFit:'cover' }}
+            loading="lazy"
+          />
         </div>
 
         {/* Info */}

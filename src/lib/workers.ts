@@ -1,9 +1,63 @@
 import { supabase } from "@/lib/supabase";
-import { getCategoryBySlug } from "@/data";
-import { getReviewsByWorkerId, getFallbackReviews } from "@/data/reviews";
-import { buildProfileDetails } from "@/data/workers/profile-details";
 import type { Worker, PopularWorker } from "@/types/worker";
-import type { WorkerProfile } from "@/types/worker-profile";
+import type { WorkerProfile, WorkerProfileDetails } from "@/types/worker-profile";
+
+type CategoryInfo = {
+  slug: string;
+  name?: string | null;
+};
+
+type WorkerWithDetails = Worker & {
+  description?: string | null;
+  services?: unknown;
+};
+
+function formatCategoryDisplay(slug: string, name?: string | null): string {
+  if (name?.trim()) return name;
+  return slug
+    .split("-")
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+function formatCategoryLabel(slug: string): string {
+  return slug.replace(/-/g, " ").toUpperCase();
+}
+
+function normalizeServices(services: unknown): string[] {
+  if (Array.isArray(services)) {
+    return services.filter((service): service is string => typeof service === "string" && service.trim().length > 0);
+  }
+
+  if (typeof services === "string" && services.trim().length > 0) {
+    try {
+      const parsed = JSON.parse(services);
+      if (Array.isArray(parsed)) {
+        return parsed.filter((service): service is string => typeof service === "string" && service.trim().length > 0);
+      }
+    } catch {
+      return services
+        .split(",")
+        .map((service) => service.trim())
+        .filter(Boolean);
+    }
+  }
+
+  return [];
+}
+
+function buildProfileDetailsFromWorker(worker: Worker): WorkerProfileDetails {
+  const detailedWorker = worker as WorkerWithDetails;
+
+  return {
+    about: detailedWorker.description?.trim() || "",
+    services: normalizeServices(detailedWorker.services).slice(0, 4),
+    gallery: [],
+    galleryMoreCount: 0,
+    phoneFull: worker.phoneFull,
+  };
+}
 
 /** Maps a 10-digit or formatted phone number into the masked +91 XXXXX ***** standard */
 export function formatMaskedPhone(phone: string): string {
@@ -27,45 +81,31 @@ export async function fetchPopularWorkers(): Promise<PopularWorker[]> {
   try {
     const { data: catData, error: catError } = await supabase
       .from("categories")
-      .select("id, slug");
+      .select("id, slug, name");
 
     if (catError || !catData || catData.length === 0) {
       return [];
     }
 
-    const categoryMap = new Map<string, string>(catData.map((c: any) => [c.id, c.slug]));
+    const categoryMap = new Map<string, CategoryInfo>(
+      catData.map((c: any) => [c.id, { slug: c.slug, name: c.name }])
+    );
 
     const { data: workersData, error: workersError } = await supabase
       .from("workers")
-      .select("id, name, location, rating, verified, image_url, category_id")
+      .select("id, name, phone, location, rating, verified, image_url, category_id, is_free_visible")
       .eq("featured", true)
-      .order("rating", { ascending: false })
-      .limit(8);
+      .order("created_at", { ascending: false })
+      .limit(50);
 
     if (workersError || !workersData || workersData.length === 0) {
       return [];
     }
 
-    const categoryIds = Array.from(new Set(workersData.map((w: any) => w.category_id)));
-    const firstTwoMap = new Map<string, string[]>();
-    for (const catId of categoryIds) {
-      if (!catId) continue;
-      const { data: firstTwo } = await supabase
-        .from("workers")
-        .select("id")
-        .eq("category_id", catId)
-        .limit(2);
-      if (firstTwo) {
-        firstTwoMap.set(catId, firstTwo.map((item: any) => item.id));
-      }
-    }
-
     return workersData.map((w: any) => {
-      const categorySlug = categoryMap.get(w.category_id) || "plumber";
-      const mockCategory = getCategoryBySlug(categorySlug);
-      
-      const firstTwoIds = firstTwoMap.get(w.category_id) || [];
-      const isUnlocked = firstTwoIds.includes(w.id);
+      const category = categoryMap.get(w.category_id);
+      const categorySlug = category?.slug || "worker";
+      const isUnlocked = w.is_free_visible === true;
 
       return {
         id: w.id,
@@ -74,14 +114,13 @@ export async function fetchPopularWorkers(): Promise<PopularWorker[]> {
         rating: Number(w.rating || 0),
         reviewCount: w.rating ? Math.round(Number(w.rating) * 15) : 25,
         isVerified: Boolean(w.verified),
-        imageUrl: w.image_url || `/workers/${categorySlug}-1.svg`,
-        category: mockCategory?.name ?? categorySlug,
+        imageUrl: w.image_url || "",
+        category: formatCategoryDisplay(categorySlug, category?.name),
         isUnlocked,
-        phoneFull: isUnlocked ? "+91 98765 43210" : undefined,
+        phoneFull: isUnlocked && w.phone ? formatFullPhone(w.phone) : undefined,
       };
     });
-  } catch (err) {
-    console.error("Failed to fetch popular workers:", err);
+  } catch (error) {
     return [];
   }
 }
@@ -91,7 +130,7 @@ export async function fetchWorkersByCategory(categorySlug: string): Promise<Work
   try {
     const { data: catData, error: catError } = await supabase
       .from("categories")
-      .select("id")
+      .select("id, name, slug")
       .eq("slug", categorySlug)
       .maybeSingle();
 
@@ -101,37 +140,41 @@ export async function fetchWorkersByCategory(categorySlug: string): Promise<Work
 
     const { data: workersData, error: workersError } = await supabase
       .from("workers")
-      .select("id, name, slug, category_id, location, experience, rating, verified, description, image_url, services, featured")
-      .eq("category_id", catData.id);
+      .select("id, name, slug, phone, category_id, location, experience, rating, verified, description, image_url, services, featured, is_free_visible")
+      .eq("category_id", catData.id)
+      .order("is_free_visible", { ascending: false })
+      .order("name");
 
     if (workersError || !workersData || workersData.length === 0) {
       return [];
     }
 
-    const mockCategory = getCategoryBySlug(categorySlug);
+    const categoryDisplay = formatCategoryDisplay(catData.slug, catData.name);
+    const categoryLabel = formatCategoryLabel(catData.slug);
 
-    return workersData.map((w: any, index: number) => {
-      const isUnlocked = index < 2; // Unlock first two by default
+    return workersData.map((w: any) => {
+      const isUnlocked = w.is_free_visible === true;
 
       return {
         id: w.id,
         name: w.name,
         categorySlug: categorySlug as any,
-        categoryLabel: mockCategory?.label ?? categorySlug.toUpperCase(),
-        categoryDisplay: mockCategory?.name ?? categorySlug,
+        categoryLabel,
+        categoryDisplay,
         area: w.location || "Jagtial",
         rating: Number(w.rating || 0),
         reviewCount: w.rating ? Math.round(Number(w.rating) * 15) : 25,
         yearsExperience: Number(w.experience || 5),
         isVerified: Boolean(w.verified),
-        imageUrl: w.image_url || `/workers/${categorySlug}-1.svg`,
+        imageUrl: w.image_url || "",
         isUnlocked,
-        phoneMasked: "+91 XXXXX XXXXX",
-        phoneFull: isUnlocked ? "+91 98765 43210" : undefined,
+        phoneMasked: isUnlocked && w.phone ? formatMaskedPhone(w.phone) : "+91 XXXXX XXXXX",
+        phoneFull: isUnlocked && w.phone ? formatFullPhone(w.phone) : undefined,
+        description: w.description,
+        services: w.services,
       };
     });
-  } catch (err) {
-    console.error(`Failed to fetch workers for category ${categorySlug}:`, err);
+  } catch (error) {
     return [];
   }
 }
@@ -141,7 +184,7 @@ export async function fetchWorkerById(workerId: string): Promise<Worker | null> 
   try {
     const { data: w, error } = await supabase
       .from("workers")
-      .select("id, name, slug, category_id, location, experience, rating, verified, description, image_url, services, featured, categories:category_id(slug)")
+      .select("id, name, slug, phone, category_id, location, experience, rating, verified, description, image_url, services, featured, is_free_visible, categories:category_id(slug, name)")
       .eq("id", workerId)
       .maybeSingle();
 
@@ -150,54 +193,43 @@ export async function fetchWorkerById(workerId: string): Promise<Worker | null> 
     }
 
     const categorySlug = (w.categories as any)?.slug || "plumber";
-    const mockCategory = getCategoryBySlug(categorySlug);
+    const categoryName = (w.categories as any)?.name;
 
-    // Resolve lock status: Query first two workers of this category
-    const { data: firstTwo } = await supabase
-      .from("workers")
-      .select("id")
-      .eq("category_id", w.category_id)
-      .limit(2);
-
-    const isUnlocked = firstTwo?.some((item: any) => item.id === w.id) ?? false;
+    const isUnlocked = w.is_free_visible === true;
 
     return {
       id: w.id,
       name: w.name,
       categorySlug: categorySlug as any,
-      categoryLabel: mockCategory?.label ?? categorySlug.toUpperCase(),
-      categoryDisplay: mockCategory?.name ?? categorySlug,
+      categoryLabel: formatCategoryLabel(categorySlug),
+      categoryDisplay: formatCategoryDisplay(categorySlug, categoryName),
       area: w.location || "Jagtial",
       rating: Number(w.rating || 0),
       reviewCount: w.rating ? Math.round(Number(w.rating) * 15) : 25,
       yearsExperience: Number(w.experience || 5),
       isVerified: Boolean(w.verified),
-      imageUrl: w.image_url || `/workers/${categorySlug}-1.svg`,
+      imageUrl: w.image_url || "",
       isUnlocked,
-      phoneMasked: "+91 XXXXX XXXXX",
-      phoneFull: isUnlocked ? "+91 98765 43210" : undefined,
-    };
+      phoneMasked: isUnlocked && w.phone ? formatMaskedPhone(w.phone) : "+91 XXXXX XXXXX",
+      phoneFull: isUnlocked && w.phone ? formatFullPhone(w.phone) : undefined,
+      description: w.description,
+      services: w.services,
+    } as WorkerWithDetails;
   } catch (err) {
     console.error(`Failed to fetch worker by ID ${workerId}:`, err);
     return null;
   }
 }
 
-/** Fetch worker profile details & static mock review associations */
+/** Fetch worker profile details from the Supabase worker row only. */
 export async function fetchWorkerProfile(workerId: string): Promise<WorkerProfile | null> {
   const worker = await fetchWorkerById(workerId);
   if (!worker) return null;
 
-  const stored = getReviewsByWorkerId(workerId);
-  const profileReviews =
-    stored.length >= 2
-      ? stored
-      : [...stored, ...getFallbackReviews(worker, 2 - stored.length)];
-
   return {
     worker,
-    details: buildProfileDetails(worker),
-    reviews: profileReviews.slice(0, 2),
+    details: buildProfileDetailsFromWorker(worker),
+    reviews: [],
   };
 }
 
@@ -206,43 +238,42 @@ export async function fetchAllWorkers(): Promise<Worker[]> {
   try {
     const { data: catData } = await supabase
       .from("categories")
-      .select("id, slug");
+      .select("id, slug, name");
 
-    const categoryMap = new Map<string, string>(catData?.map((c: any) => [c.id, c.slug]) || []);
+    const categoryMap = new Map<string, CategoryInfo>(
+      catData?.map((c: any) => [c.id, { slug: c.slug, name: c.name }]) || []
+    );
 
     const { data: workersData, error } = await supabase
       .from("workers")
-      .select("id, name, slug, category_id, location, experience, rating, verified, description, image_url, services, featured");
+      .select("id, name, slug, phone, category_id, location, experience, rating, verified, description, image_url, services, featured, is_free_visible");
 
     if (error || !workersData || workersData.length === 0) {
       return [];
     }
 
-    const workersCountByCategory = new Map<string, number>();
-
     return workersData.map((w: any) => {
-      const categorySlug = categoryMap.get(w.category_id) || "plumber";
-      const mockCategory = getCategoryBySlug(categorySlug);
-
-      const count = workersCountByCategory.get(categorySlug) || 0;
-      const isUnlocked = count < 2;
-      workersCountByCategory.set(categorySlug, count + 1);
+      const category = categoryMap.get(w.category_id);
+      const categorySlug = category?.slug || "worker";
+      const isUnlocked = w.is_free_visible === true;
 
       return {
         id: w.id,
         name: w.name,
         categorySlug: categorySlug as any,
-        categoryLabel: mockCategory?.label ?? categorySlug.toUpperCase(),
-        categoryDisplay: mockCategory?.name ?? categorySlug,
+        categoryLabel: formatCategoryLabel(categorySlug),
+        categoryDisplay: formatCategoryDisplay(categorySlug, category?.name),
         area: w.location || "Jagtial",
         rating: Number(w.rating || 0),
         reviewCount: w.rating ? Math.round(Number(w.rating) * 15) : 25,
         yearsExperience: Number(w.experience || 5),
         isVerified: Boolean(w.verified),
-        imageUrl: w.image_url || `/workers/${categorySlug}-1.svg`,
+        imageUrl: w.image_url || "",
         isUnlocked,
-        phoneMasked: "+91 XXXXX XXXXX",
-        phoneFull: isUnlocked ? "+91 98765 43210" : undefined,
+        phoneMasked: isUnlocked && w.phone ? formatMaskedPhone(w.phone) : "+91 XXXXX XXXXX",
+        phoneFull: isUnlocked && w.phone ? formatFullPhone(w.phone) : undefined,
+        description: w.description,
+        services: w.services,
       };
     });
   } catch (err) {

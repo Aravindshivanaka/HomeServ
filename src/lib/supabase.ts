@@ -14,17 +14,19 @@ export async function fetchPopularWorkers(): Promise<PopularWorker[]> {
   try {
     const { data: catData, error: catError } = await supabase
       .from("categories")
-      .select("id, slug");
+      .select("id, slug, name");
 
     if (catError || !catData || catData.length === 0) {
       return [];
     }
 
-    const categoryMap = new Map<string, string>(catData.map((c: any) => [c.id, c.slug]));
+    const categoryMap = new Map<string, { slug: string; name: string }>(
+      catData.map((c: any) => [c.id, { slug: c.slug, name: c.name }])
+    );
 
     const { data: workersData, error: workersError } = await supabase
       .from("workers")
-      .select("id, name, location, rating, verified, image_url, category_id")
+      .select("id, name, phone, location, rating, verified, image_url, category_id, is_free_visible")
       .eq("featured", true)
       .order("rating", { ascending: false })
       .limit(8);
@@ -33,28 +35,10 @@ export async function fetchPopularWorkers(): Promise<PopularWorker[]> {
       return [];
     }
 
-    const categoryIds = Array.from(new Set(workersData.map((w: any) => w.category_id)));
-    const firstTwoMap = new Map<string, string[]>();
-    for (const catId of categoryIds) {
-      if (!catId) continue;
-      const { data: firstTwo } = await supabase
-        .from("workers")
-        .select("id")
-        .eq("category_id", catId)
-        .limit(2);
-      if (firstTwo) {
-        firstTwoMap.set(catId, firstTwo.map((item: any) => item.id));
-      }
-    }
-
-    const { getCategoryBySlug } = await import("@/data");
-
     return workersData.map((w: any) => {
-      const categorySlug = categoryMap.get(w.category_id) || "plumber";
-      const mockCategory = getCategoryBySlug(categorySlug);
-      
-      const firstTwoIds = firstTwoMap.get(w.category_id) || [];
-      const isUnlocked = firstTwoIds.includes(w.id);
+      const category = categoryMap.get(w.category_id);
+      const categorySlug = category?.slug || "worker";
+      const isUnlocked = w.is_free_visible === true;
 
       return {
         id: w.id,
@@ -63,10 +47,10 @@ export async function fetchPopularWorkers(): Promise<PopularWorker[]> {
         rating: Number(w.rating || 0),
         reviewCount: w.rating ? Math.round(Number(w.rating) * 15) : 25,
         isVerified: Boolean(w.verified),
-        imageUrl: w.image_url || `/workers/${categorySlug}-1.svg`,
-        category: mockCategory?.name ?? categorySlug,
+        imageUrl: w.image_url || "",
+        category: category?.name ?? categorySlug,
         isUnlocked,
-        phoneFull: isUnlocked ? "+91 98765 43210" : undefined,
+        phoneFull: isUnlocked && w.phone ? w.phone : undefined,
       };
     });
   } catch (err) {

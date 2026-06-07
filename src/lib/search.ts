@@ -1,5 +1,4 @@
-import { getAllCategories } from "@/data";
-import { servicesByCategory } from "@/data/workers/services-by-category";
+import { getAllCategories } from "@/lib/categories";
 import type { Category, Worker } from "@/types";
 
 /**
@@ -46,7 +45,7 @@ export function performLocalSearch(
     return { categories: [], workers: [] };
   }
 
-  const allCategories = customCategories || getAllCategories();
+  const allCategories = customCategories || [];
   const allWorkers = customWorkers || [];
 
   // 1. Filter categories
@@ -61,7 +60,7 @@ export function performLocalSearch(
     }
 
     // Check service names listed for this category
-    const services = servicesByCategory[cat.slug] || [];
+    const services: string[] = [];
     if (services.some((service) => matchesQuery(service, trimmed))) {
       return true;
     }
@@ -89,7 +88,7 @@ export function performLocalSearch(
         score += 50;
       }
 
-      const services = servicesByCategory[worker.categorySlug] || [];
+      const services: string[] = [];
       if (services.some((service) => matchesQuery(service, trimmed))) {
         score += 25;
       }

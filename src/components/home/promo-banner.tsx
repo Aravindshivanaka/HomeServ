@@ -1,8 +1,16 @@
 import Image from "next/image";
 import { Phone } from "lucide-react";
 
-import { bannerSlides } from "@/data/home";
 import { layout } from "@/lib/layout";
+
+const bannerSlides = [
+  {
+    id: "home-help",
+    tagline: "TRUSTED LOCAL WORKERS",
+    title: "Find expert help for your home",
+    ctaLabel: "Call Now",
+  },
+];
 
 /** Static first slide — no client JS for faster loads on weak networks */
 export function PromoBanner() {
